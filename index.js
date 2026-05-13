@@ -15,8 +15,8 @@ app.post('/saque', async (req, res) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-public-key': 'SUA_PUBLIC_KEY',
-          'x-secret-key': 'SUA_SECRET_KEY'
+          'x-public-key': 'bruno27102021_mix4otv1naipgbc2',
+          'x-secret-key': 'q7zhs88ojlnh3honex6bd0jneq9ghehdy0z1rz8kufbazgawd76xp3rnosfzk094'
         },
         body: JSON.stringify(req.body)
       }
