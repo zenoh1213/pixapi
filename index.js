@@ -40,4 +40,22 @@ app.get('/', (req, res) => {
   res.send('API ONLINE')
 })
 
+app.get('/ip', async (req, res) => {
+
+  try {
+
+    const response = await fetch('https://api.ipify.org')
+
+    const ip = await response.text()
+
+    res.send(ip)
+
+  } catch(err) {
+
+    res.status(500).send(err.message)
+
+  }
+
+})
+
 app.listen(process.env.PORT || 3000)
