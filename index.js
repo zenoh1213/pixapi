@@ -24,6 +24,8 @@ app.post('/pix', async (req, res) => {
 
     const order = req.body
 
+    const cpf = ((order.client && order.client.document) || order.cpf || '').replace(/\D/g, '')
+
     const payload = {
       amount: 6500,
       currency: 'BRL',
@@ -33,16 +35,20 @@ app.post('/pix', async (req, res) => {
       },
       items: [
         {
-          name: 'Furadeira e Parafusadeira 48V - MAXTOOL',
+          title: 'Furadeira e Parafusadeira 48V - MAXTOOL',
           quantity: 1,
-          unitPrice: 6500
+          unitPrice: 6500,
+          tangible: true
         }
       ],
       customer: {
-        name:     (order.client && order.client.name)     || order.nome     || 'Cliente',
-        email:    (order.client && order.client.email)    || order.email    || '',
-        phone:    (order.client && order.client.phone)    || order.telefone || '',
-        document: (order.client && order.client.document) || order.cpf      || ''
+        name:  (order.client && order.client.name)  || order.nome  || 'Cliente',
+        email: (order.client && order.client.email) || order.email || '',
+        phone: (order.client && order.client.phone) || order.telefone || '',
+        document: {
+          type:   'cpf',
+          number: cpf || '00000000000'
+        }
       },
       externalRef: order.identifier || order.orderId || '',
       postbackUrl: 'https://leao.infinityfree.me/'
