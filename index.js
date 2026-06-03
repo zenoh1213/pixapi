@@ -67,7 +67,7 @@ app.post('/pix', async (req, res) => {
 
     const pixCode =
       data?.pix?.code       ||
-      data?.pix?.qrCode     ||
+      data?.pix?.qrcode     ||
       data?.pix?.emv        ||
       data?.data?.pix?.code ||
       data?.qrCode          ||
