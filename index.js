@@ -18,20 +18,65 @@ app.use((req, res, next) => {
 
 app.post('/pix', async (req, res) => {
   try {
-    const response = await fetch(
-      'https://app.sigilopay.com.br/api/v1/gateway/pix/receive',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-public-key': 'bruno27102021_mix4otv1naipgbc2',
-          'x-secret-key': 'q7zhs88ojlnh3honex6bd0jneq9ghehdy0z1rz8kufbazgawd76xp3rnosfzk094'
-        },
-        body: JSON.stringify(req.body)
-      }
-    )
+    const publicKey = process.env.PAYSHARK_PUBLIC_KEY
+    const secretKey = process.env.PAYSHARK_SECRET_KEY
+    const auth = Buffer.from(`${publicKey}:${secretKey}`).toString('base64')
+
+    const order = req.body
+
+    const payload = {
+      amount: 6500,
+      currency: 'BRL',
+      paymentMethod: 'pix',
+      pix: {
+        expiresInMinutes: 15
+      },
+      items: [
+        {
+          name: 'Furadeira e Parafusadeira 48V - MAXTOOL',
+          quantity: 1,
+          unitPrice: 6500
+        }
+      ],
+      customer: {
+        name:     (order.client && order.client.name)     || order.nome     || 'Cliente',
+        email:    (order.client && order.client.email)    || order.email    || '',
+        phone:    (order.client && order.client.phone)    || order.telefone || '',
+        document: (order.client && order.client.document) || order.cpf      || ''
+      },
+      externalRef: order.identifier || order.orderId || '',
+      postbackUrl: 'https://leao.infinityfree.me/'
+    }
+
+    const response = await fetch('https://api.paysharkgateway.com.br/v1/transactions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${auth}`
+      },
+      body: JSON.stringify(payload)
+    })
+
     const data = await response.json()
-    res.status(response.status).json(data)
+
+    const pixCode =
+      data?.pix?.code       ||
+      data?.pix?.qrCode     ||
+      data?.pix?.emv        ||
+      data?.data?.pix?.code ||
+      data?.qrCode          ||
+      data?.emv             ||
+      null
+
+    if (!pixCode) {
+      return res.status(502).json({
+        message: data?.message || 'PIX não gerado',
+        details: data
+      })
+    }
+
+    return res.json({ pix: { code: pixCode } })
+
   } catch(err) {
     res.status(500).json({ error: err.message })
   }
